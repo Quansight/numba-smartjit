@@ -74,7 +74,7 @@ jobs:
 
       - name: pip install Numba ${{ matrix.numba-version }}
         run: |
-          pip install numba=${{ matrix.numba-version }}
+          pip install numba==${{ matrix.numba-version }}
 
       # - name: conda config
       #   shell: bash -l {0}
