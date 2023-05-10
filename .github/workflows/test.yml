@@ -1,0 +1,95 @@
+name: Numba-smartjit
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  pull_request:
+    branches:
+      - main
+
+# kill any previous running job on a new commit
+concurrency:
+  group: build-and-test-smartjit-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-tests') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+
+      - name: Install flake8
+        run: |
+          pip install flake8
+
+      - name: Lint:flake8
+        run: |
+          flake8 .
+
+  test:
+    name:  ${{ matrix.os }} - Numba v${{matrix.numba-version}} - Python v${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ['3.10', '3.9', '3.8', '3.7']
+        numba-version: ['0.56', '0.55']
+        include:
+          - python-version: '3.11'
+            numba-version: '0.57'
+
+    needs: lint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Create test environment v${{ matrix.python-version }}
+        shell: bash -l {0}
+        run: |
+          cat environment.yml > environment_test.yaml
+          echo "  - numba=${{ matrix.numba-version }}" >> environment_test.yaml
+          echo "  - python=${{ matrix.python-version }}" >> environment_test.yaml
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          channel-priority: flexible
+          channels: conda-forge,numba
+          environment-file: environment_test.yml
+          mamba-version: "*"
+
+      - name: conda config
+        shell: bash -l {0}
+        run: |
+          conda config --show
+
+      - name: conda list
+        shell: bash -l {0}
+        run: |
+          conda list
+
+      # - name: Develop numba-smartjit
+      #   shell: bash -l {0}
+      #   run: |
+      #     python setup.py develop
+
+      - name: Run tests
+        shell: bash -l {0}
+        env:
+          EXPECTED_PYTHON_VERSION: ${{ matrix.python-version }}
+          EXPECTED_NUMBA_VERSION: ${{ matrix.numba-version }}
+        run: |
+          pytest -sv -r A tests/ -x
