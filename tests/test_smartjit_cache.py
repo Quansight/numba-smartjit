@@ -1,8 +1,12 @@
 import os
-
-from numba.tests.test_caching import DispatcherCacheUsecasesTest
-
+import pytest
 from smart_jit import smart_jit  # noqa: F401
+
+try:
+    from numba.tests.test_caching import DispatcherCacheUsecasesTest
+except ImportError:
+    pytest.skip('Missing "DispatcherCacheUsecasesTest"',
+                allow_module_level=True)
 
 
 class TestCache(DispatcherCacheUsecasesTest):
