@@ -60,9 +60,9 @@ jobs:
       - name: Create test environment v${{ matrix.python-version }}
         shell: bash -l {0}
         run: |
-          cat environment.yml > environment_test.yaml
-          echo "  - numba=${{ matrix.numba-version }}" >> environment_test.yaml
-          echo "  - python=${{ matrix.python-version }}" >> environment_test.yaml
+          cat environment.yml > environment_test.yml
+          echo "  - numba=${{ matrix.numba-version }}" >> environment_test.yml
+          echo "  - python=${{ matrix.python-version }}" >> environment_test.yml
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
