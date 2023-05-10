@@ -56,31 +56,36 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
 
-      - name: Create test environment v${{ matrix.python-version }}
-        shell: bash -l {0}
+      # - name: Create test environment v${{ matrix.python-version }}
+      #   shell: bash -l {0}
+      #   run: |
+      #     cat environment.yml > environment_test.yml
+      #     echo "  - numba=${{ matrix.numba-version }}" >> environment_test.yml
+      #     echo "  - python=${{ matrix.python-version }}" >> environment_test.yml
+
+      # - uses: conda-incubator/setup-miniconda@v2
+      #   with:
+      #     python-version: ${{ matrix.python-version }}
+      #     channel-priority: flexible
+      #     channels: conda-forge,numba
+      #     environment-file: environment_test.yml
+      #     mamba-version: "*"
+
+      - name: pip install Numba ${{ matrix.numba-version }}
         run: |
-          cat environment.yml > environment_test.yml
-          echo "  - numba=${{ matrix.numba-version }}" >> environment_test.yml
-          echo "  - python=${{ matrix.python-version }}" >> environment_test.yml
+          pip install numba=${{ matrix.numba-version }}
 
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-          channel-priority: flexible
-          channels: conda-forge,numba
-          environment-file: environment_test.yml
-          mamba-version: "*"
+      # - name: conda config
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda config --show
 
-      - name: conda config
-        shell: bash -l {0}
-        run: |
-          conda config --show
-
-      - name: conda list
-        shell: bash -l {0}
-        run: |
-          conda list
+      # - name: conda list
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda list
 
       # - name: Develop numba-smartjit
       #   shell: bash -l {0}
