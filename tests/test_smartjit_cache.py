@@ -1,6 +1,6 @@
 import os
 import pytest
-from smart_jit import smart_jit  # noqa: F401
+from smart_jit import jit  # noqa: F401
 
 try:
     from numba.tests.test_caching import DispatcherCacheUsecasesTest

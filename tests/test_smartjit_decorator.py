@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from numba.core.event import EventStatus, Listener, install_listener
 
-from smart_jit import Action, smart_jit, smart_jit_events
+from smart_jit import Action, jit, smart_jit_events
 
 
 class CustomListener(Listener):
@@ -87,7 +87,7 @@ def check_compiler_listener(cfunc, args):
 
 @pytest.mark.parametrize("use_jit", [enable_jit, use_interpreter])
 def test_use_jit(use_jit):
-    cfunc = smart_jit(use_jit=use_jit)(add)
+    cfunc = jit(use_jit=use_jit)(add)
     if use_jit in (False, use_interpreter):
         check_interpreter_listener(cfunc, (2, 3))
     else:
@@ -96,7 +96,7 @@ def test_use_jit(use_jit):
 
 @pytest.mark.parametrize("A", [np.arange(10), np.arange(100_000)])
 def test_use_jit_sum_fast(A):
-    cfunc = smart_jit(use_jit=use_jit_sum_fast)(sum_fast)
+    cfunc = jit(use_jit=use_jit_sum_fast)(sum_fast)
     if len(A) == 10:
         check_interpreter_listener(cfunc, (A,))
     else:
@@ -104,7 +104,7 @@ def test_use_jit_sum_fast(A):
 
 
 def test_interpreter_action():
-    _jit = smart_jit("int64(int64, int64)", use_jit=use_interpreter)
+    _jit = jit("int64(int64, int64)", use_jit=use_interpreter)
     cfunc = _jit(add)
     check_interpreter_listener(cfunc, ("Hello, ", "World"))
 
@@ -115,7 +115,7 @@ def test_interpreter_action():
 
 @pytest.mark.parametrize("inp", [(2, 3), (2.2, 4.4)])
 def test_interpreter_action_with_signature(inp):
-    _jit = smart_jit("float64(float64, float64)", use_jit=use_interpreter)
+    _jit = jit("float64(float64, float64)", use_jit=use_interpreter)
     cfunc = _jit(add)
     check_compiler_listener(cfunc, inp)
 
@@ -136,7 +136,7 @@ def test_actions_combined():
             # raise exception otherwise
             return Action.RAISE_EXCEPTION
 
-    _jit = smart_jit(use_jit=use_jit_func)
+    _jit = jit(use_jit=use_jit_func)
     cfunc = _jit(add)
 
     # calling cfunc with integers or floats works
@@ -161,7 +161,7 @@ def test_actions_combined_with_jit_signature():
             # raise exception for other types
             return Action.RAISE_EXCEPTION
 
-    _jit = smart_jit("int64(int64, int64)", use_jit=use_jit_func)
+    _jit = jit("int64(int64, int64)", use_jit=use_jit_func)
     cfunc = _jit(add)
 
     # calling cfunc with integers or floats works
@@ -173,13 +173,13 @@ def test_actions_combined_with_jit_signature():
 
 
 def test_invalid_call():
-    cfunc = smart_jit("int64(int64, int64)", warn_on_fallback=True)(add)
+    cfunc = jit("int64(int64, int64)", warn_on_fallback=True)(add)
     with pytest.raises(TypeError):
         cfunc("Hello", "world")
 
 
 def test_no_warn_on_fallback():
-    cfunc = smart_jit("float64(float64, float64)", warn_on_fallback=True)(add)
+    cfunc = jit("float64(float64, float64)", warn_on_fallback=True)(add)
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         cfunc(2, 3)
@@ -196,7 +196,7 @@ _options = [
 
 @pytest.mark.parametrize("options", _options)
 def test_smart_jit_with_options(options):
-    _jit = smart_jit(**options)
+    _jit = jit(**options)
     cfunc = _jit(add)
     assert cfunc(2, 3) == 5
     assert cfunc(2.2, 3.3) == 5.5
@@ -205,4 +205,4 @@ def test_smart_jit_with_options(options):
 
 def test_invalid_use_jit_type():
     with pytest.raises(TypeError):
-        smart_jit(use_jit="always")(add)
+        jit(use_jit="always")(add)

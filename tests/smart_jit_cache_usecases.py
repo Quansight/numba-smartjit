@@ -2,7 +2,7 @@
 This file will be copied to a temporary directory in order to
 exercise caching compiled Numba functions.
 
-Copied from "cache_usecases.py" with the jit decorator replaced by @smart_jit
+Copied from "cache_usecases.py" with the jit decorator replaced by @jit
 
 See test_dispatcher.py.
 """
@@ -12,10 +12,10 @@ import sys
 import numpy as np
 from numba.tests.support import TestCase
 
-from smart_jit import smart_jit
+from smart_jit import jit
 
 
-@smart_jit(cache=True, nopython=True)
+@jit(cache=True, nopython=True)
 def simple_usecase(x):
     return x
 
@@ -24,38 +24,38 @@ def simple_usecase_caller(x):
     return simple_usecase(x)
 
 
-@smart_jit(cache=True, nopython=True)
+@jit(cache=True, nopython=True)
 def add_usecase(x, y):
     return x + y + Z
 
 
-@smart_jit(cache=True, forceobj=True)
+@jit(cache=True, forceobj=True)
 def add_objmode_usecase(x, y):
     object()
     return x + y + Z
 
 
-@smart_jit(nopython=True)
+@jit(nopython=True)
 def add_nocache_usecase(x, y):
     return x + y + Z
 
 
-@smart_jit(cache=True, nopython=True)
+@jit(cache=True, nopython=True)
 def inner(x, y):
     return x + y + Z
 
 
-@smart_jit(cache=True, nopython=True)
+@jit(cache=True, nopython=True)
 def outer(x, y):
     return inner(-y, x)
 
 
-@smart_jit(cache=False, nopython=True)
+@jit(cache=False, nopython=True)
 def outer_uncached(x, y):
     return inner(-y, x)
 
 
-@smart_jit(cache=True, forceobj=True)
+@jit(cache=True, forceobj=True)
 def looplifted(n):
     object()
     res = 0
@@ -64,7 +64,7 @@ def looplifted(n):
     return res
 
 
-@smart_jit(cache=True, nopython=True)
+@jit(cache=True, nopython=True)
 def ambiguous_function(x):
     return x + 2
 
@@ -72,7 +72,7 @@ def ambiguous_function(x):
 renamed_function1 = ambiguous_function
 
 
-@smart_jit(cache=True, nopython=True)
+@jit(cache=True, nopython=True)
 def ambiguous_function(x):
     return x + 6
 
@@ -81,7 +81,7 @@ renamed_function2 = ambiguous_function
 
 
 def make_closure(x):
-    @smart_jit(cache=True, nopython=True)
+    @jit(cache=True, nopython=True)
     def closure(y):
         return x + y
 
@@ -97,7 +97,7 @@ closure4 = make_closure(9)
 biggie = np.arange(10**6)
 
 
-@smart_jit(cache=True, nopython=True)
+@jit(cache=True, nopython=True)
 def use_big_array():
     return biggie
 
@@ -119,17 +119,17 @@ class _TestModule(TestCase):
         self.assertPreciseEqual(mod.outer(3, 2), 2)
 
 
-@smart_jit(cache=True)
+@jit(cache=True)
 def first_class_function_mul(x):
     return x * x
 
 
-@smart_jit(cache=True)
+@jit(cache=True)
 def first_class_function_add(x):
     return x + x
 
 
-@smart_jit(cache=True)
+@jit(cache=True)
 def first_class_function_usecase(f, x):
     return f(x)
 
@@ -139,6 +139,6 @@ def self_test():
     _TestModule().check_module(mod)
 
 
-@smart_jit(parallel=True, cache=True, nopython=True)
+@jit(parallel=True, cache=True, nopython=True)
 def parfor_usecase(ary):
     return ary * ary + ary

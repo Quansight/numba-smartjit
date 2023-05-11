@@ -1,12 +1,12 @@
 """
 """
 
-__all__ = ["smart_jit", "Action", "smart_jit_events"]
+__all__ = ["jit", "smart_jit_events"]
 
 
 from typing import Callable
 
-from numba import jit
+from numba import jit as numba_jit
 from numba.core import event
 from numba.core.registry import CPUDispatcher
 from numba.core.target_extension import (
@@ -156,7 +156,7 @@ target_registry["SmartJitJIT"] = SmartJIT
 dispatcher_registry[target_registry["SmartJitJIT"]] = SmartJitDispatcher
 
 
-def smart_jit(
+def jit(
     *args,
     use_jit=SmartJitDispatcher._default_checker,
     warn_on_fallback=False,
@@ -180,7 +180,7 @@ def smart_jit(
 
     kws["use_jit"] = use_jit
     kws["warn_on_fallback"] = warn_on_fallback
-    return jit(
+    return numba_jit(
         *args,
         **kws,
         _target="SmartJitJIT",
